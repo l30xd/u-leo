@@ -1,9 +1,51 @@
 const API_URL = "http://127.0.0.1:8000/students";
+const AUTH_TOKEN_KEY = "crud_auth_token";
+
+function getAuthToken() {
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    if (!token) {
+        window.location.href = "/login.html";
+    }
+    return token;
+}
+
+function getAuthHeaders() {
+    return {
+        "content-type": "application/json",
+        "Authorization": `Bearer ${getAuthToken()}`,
+    };
+}
+
+function handleResponse(response) {
+    if (response.status === 401) {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+        window.location.href = "/login.html";
+        return Promise.reject(new Error("No autorizado."));
+    }
+    return response.text().then(text => {
+        if (!response.ok) {
+            throw new Error(text || "Error en la operación");
+        }
+        return text ? JSON.parse(text) : null;
+    });
+}
 
 document.addEventListener("DOMContentLoaded", () => {
+    getAuthToken();
     setupForm();
     loadStudents();
+    setupLogout();
 })
+
+function setupLogout() {
+    const logoutBtn = document.getElementById("logout-btn");
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+            localStorage.removeItem(AUTH_TOKEN_KEY);
+            window.location.href = "/login.html";
+        });
+    }
+}
 
 const setupForm = () => {
     const form = document.getElementById("student-form");
@@ -33,18 +75,10 @@ function saveStudent() {
 
     fetch(url, {
         method: method,
-        headers: {
-            "content-type": "application/json"
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify(studentData)
     })
-    .then(async response => {
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(text || "Error en la operación");
-        }
-        return response.json();
-    })
+    .then(handleResponse)
     .then(() => {
         alert("Estudiante guardado correctamente");
         loadStudents();
@@ -57,13 +91,10 @@ function saveStudent() {
 }
 
 function loadStudents() {
-    fetch(`${API_URL}/`)
-    .then(async response => {
-        if (!response.ok) {
-            throw new Error("No se pudo cargar la lista de estudiantes.");
-        }
-        return response.json();
+    fetch(`${API_URL}/`, {
+        headers: getAuthHeaders(),
     })
+    .then(handleResponse)
     .then(data => {
         const tableBody = document.getElementById("student-list");
         tableBody.innerHTML = "";
@@ -93,13 +124,10 @@ function loadStudents() {
 }
 
 function editStudent(id) {
-    fetch(`${API_URL}/${id}`)
-    .then(async response => {
-        if (!response.ok) {
-            throw new Error("No se pudo cargar el estudiante.");
-        }
-        return response.json();
+    fetch(`${API_URL}/${id}`, {
+        headers: getAuthHeaders(),
     })
+    .then(handleResponse)
     .then(student => {
         document.getElementById("student-id").value = student.id;
         document.getElementById("name").value = student.name;
@@ -112,9 +140,15 @@ function editStudent(id) {
 function deleteStudent(id) {
     if (confirm("¿Estás seguro de eliminar este estudiante?")) {
         fetch(`${API_URL}/${id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: getAuthHeaders(),
         })
         .then(async response => {
+            if (response.status === 401) {
+                localStorage.removeItem(AUTH_TOKEN_KEY);
+                window.location.href = "/login.html";
+                return;
+            }
             if (!response.ok) {
                 const text = await response.text();
                 throw new Error(text || "Error eliminando estudiante");

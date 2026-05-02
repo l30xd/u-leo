@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from models.student_model import Student, StudentReponse
 from controllers.student_controller import StudentController
 from database import get_db
+from routes.auth import verify_token
 
-router = APIRouter(prefix="/students")
+router = APIRouter(prefix="/students", dependencies=[Depends(verify_token)])
 
 @router.get('/', response_model=list[StudentReponse])
 def get_students(db: Session=Depends(get_db)):
