@@ -44,3 +44,91 @@
     color: #999;
     opacity: 1;
 }
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+label {
+    display: block;           /* Cada etiqueta en su propia línea */
+    margin-bottom: 5px;       /* Espacio debajo de la etiqueta */
+    font-weight: 600;         /* Un poco de negrita */
+    font-family: Arial, sans-serif;
+    font-size: 18px;
+    color: #333;              /* Gris oscuro, legible */
+}
+
+.label-white {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 18px;
+    color: #ddd;              /* Texto claro sobre fondo oscuro */
+    font-family: Arial, sans-serif;
+}
+
+.table-bordered {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;      /* Same font as nav */
+    font-size: 16px;                     /* Same font size */
+    background-color: #333;               /* Nav background color */
+    border-radius: 5px;                   /* Rounded corners like nav */
+    overflow: hidden;                      /* Ensures rounded corners work */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Same shadow as nav */
+    color: white;                          /* Default text color */
+}
+
+.table-bordered th,
+.table-bordered td {
+    padding: 12px 16px;                    /* Similar to nav link padding */
+    border: 1px solid #555;                 /* Subtle border visible on dark */
+    text-align: left;
+}
+
+.table-bordered thead th {
+    background-color: #222;                 /* Slightly darker header */
+    color: white;
+    font-weight: 600;
+    border-color: #444;                      /* Match border */
+}
+
+.table-bordered tbody tr {
+    background-color: #333;                  /* Same as table background */
+    transition: background-color 0.3s ease;  /* Smooth hover like nav */
+}
+
+.table-bordered tbody tr:nth-child(even) {
+    background-color: #3a3a3a;                /* Slight alternation */
+}
+
+.table-bordered tbody tr:hover {
+    background-color: #555;                    /* Nav hover color */
+}
+
+/* Optional: style the first column or any specific cells */
+.table-bordered td:first-child {
+    font-weight: 500;
+}
