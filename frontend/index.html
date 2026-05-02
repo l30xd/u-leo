@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CRUD estudiantes</title>
     <link rel="stylesheet" href="style.css">
+    
 </head>
 
 <body>
@@ -23,7 +24,7 @@
             </div>
             <div class="form-group">
                 <label for="grade">Nota</label>
-                <input type="number" id="grade" name="grade" required min="1" max="5">
+                <input type="number" id="grade" name="grade" required min="1" max="5" step="0.1">
             </div>
             <div class="form-group">
                 <button type="submit" id="submit-btn" class="btn btn-primary">Guardar</button>
@@ -31,8 +32,8 @@
             </div>
         </form>
     </div>
-    <div>
-        <Label>Lista de Estudiantes</Label>
+    <div class="list-container">
+        <h2>Lista de Estudiantes</h2>
         <table class="table-bordered">
             <thead>
                 <tr>
@@ -43,7 +44,6 @@
                 </tr>
             </thead>
             <tbody id="student-list">
-
             </tbody>
         </table>
     </div>

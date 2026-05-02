@@ -11,7 +11,7 @@ class StudentController:
     
     @staticmethod
     def get_by_id(student_id: int, db: Session=Depends(get_db))-> dict:
-        student = db.query(StudentDB).filter(student_id == StudentDB.id).first()
+        student = db.query(StudentDB).filter(StudentDB.id == student_id).first()
         if not student:
             raise HTTPException(status_code=404, detail="Estudiante no encontrado")
         return student
@@ -23,6 +23,26 @@ class StudentController:
         db.commit()
         db.refresh(new_student)
         return new_student
+    
+    @staticmethod
+    def update(student_id: int, student: Student, db: Session):
+        db_student = db.query(StudentDB).filter(StudentDB.id == student_id).first()
+        if not db_student:
+            raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+        for key, value in student.model_dump().items():
+            setattr(db_student, key, value)
+        db.commit()
+        db.refresh(db_student)
+        return db_student
+    
+    @staticmethod
+    def delete(student_id: int, db: Session):
+        db_student = db.query(StudentDB).filter(StudentDB.id == student_id).first()
+        if not db_student:
+            raise HTTPException(status_code=404, detail="Estudiante no encontrado")
+        db.delete(db_student)
+        db.commit()
+        return {"message": "Estudiante eliminado"}
 
 
 

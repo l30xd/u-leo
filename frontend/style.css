@@ -128,7 +128,23 @@ label {
     background-color: #555;                    /* Nav hover color */
 }
 
-/* Optional: style the first column or any specific cells */
+.list-container {
+    max-width: 900px;
+    margin: 30px auto 60px;
+    padding: 20px;
+}
+
+.list-container h2 {
+    margin-bottom: 18px;
+    color: #222;
+    font-size: 24px;
+    text-align: left;
+}
+
+.table-bordered {
+    margin-top: 0;
+}
+
 .table-bordered td:first-child {
     font-weight: 500;
 }
