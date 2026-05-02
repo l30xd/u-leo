@@ -1,0 +1,46 @@
+.form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background-color: #333;                /* Mismo fondo que nav y tabla */
+    padding: 25px 30px;
+    border-radius: 8px;                     /* Bordes redondeados */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3); /* Sombra */
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ddd;
+    font-size: 15px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: #444;                 /* Ligeramente más claro que el fondo */
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;                  /* Azul de acento al enfocar */
+    background-color: #3a3a3a;
+}
+
+.form-control::placeholder {
+    color: #999;
+    opacity: 1;
+}

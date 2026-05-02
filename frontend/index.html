@@ -4,27 +4,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>CRUD estudiantes</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <div class="container">
+    <div class="form-container">
         <h2>Nuevo estudiante</h2>
         <form id="student-form" action="">
             <input type="hidden" id="student-id" name="">
-            <div>
+            <div class="form-group">
                 <label for="name">Nombre</label>
                 <input type="text" id="name" name="name" required minlength="2">
             </div>
-            <div>
+            <div class="form-group">
                 <label for="age">Edad</label>
                 <input type="number" id="age" name="age" required min="1">
             </div>
-            <div>
+            <div class="form-group">
                 <label for="grade">Nota</label>
                 <input type="number" id="grade" name="grade" required min="1" max="5">
             </div>
-            <div>
+            <div class="form-group">
                 <button type="submit" id="submit-btn">Guardar</button>
                 <button type="button">Cancelar</button>
             </div>
