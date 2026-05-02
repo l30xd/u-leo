@@ -5,10 +5,9 @@ from datetime import datetime, timedelta
 from email.message import EmailMessage
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Header, Depends, status
+from fastapi import APIRouter, HTTPException, Header, Depends, status, Request
 from pydantic import BaseModel, EmailStr
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Email, To, Content
+from fastapi_mail import MessageSchema
 
 router = APIRouter(prefix="/auth")
 
@@ -27,57 +26,52 @@ class AuthToken(BaseModel):
 
 
 def get_mail_configuration() -> dict:
-    api_key = os.environ.get("SENDGRID_API_KEY")
-    from_email = os.environ.get("SENDGRID_FROM_EMAIL", "noreply@tuapp.com")
-    if not api_key:
+    username = os.getenv("EMAIL_USERNAME")
+    password = os.getenv("EMAIL_PASSWORD")
+    from_email = os.getenv("EMAIL_FROM")
+    if not username or not password or not from_email:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=(
-                "Falta configuración de SendGrid. "
-                "Define SENDGRID_API_KEY en las variables de entorno."
+                "Falta configuración de correo. "
+                "Define EMAIL_USERNAME, EMAIL_PASSWORD y EMAIL_FROM en las variables de entorno."
             ),
         )
 
     return {
-        "api_key": api_key,
+        "username": username,
+        "password": password,
         "from_email": from_email,
     }
 
 
-def send_otp_email(email: str, code: str) -> None:
-    config = get_mail_configuration()
-    sg = SendGridAPIClient(config["api_key"])
-
-    from_email = Email(config["from_email"])
-    to_email = To(email)
-    subject = "Código OTP para acceder al CRUD"
-    content = Content("text/plain", f"Tu código OTP es: {code}\n\nIntroduce este código en la aplicación para poder acceder al CRUD.")
-
-    mail = Mail(from_email, to_email, subject, content)
+async def send_otp_email(request: Request, email: str, code: str) -> None:
+    fm = request.app.state.fm
+    message = MessageSchema(
+        subject="Código OTP para acceder al CRUD",
+        recipients=[email],
+        body=f"Tu código OTP es: {code}\n\nIntroduce este código en la aplicación para poder acceder al CRUD.",
+        subtype="plain"
+    )
 
     try:
-        response = sg.send(mail)
-        if response.status_code not in [200, 201, 202]:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="No se pudo enviar el correo OTP.",
-            )
+        await fm.send_message(message)
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="No se pudo enviar el correo OTP. Verifica la configuración de SendGrid.",
+            detail="No se pudo enviar el correo OTP. Verifica la configuración SMTP.",
         ) from exc
 
 
 @router.post("/request-otp")
-def request_otp(payload: OTPRequest):
+async def request_otp(payload: OTPRequest, request: Request):
     code = f"{random.randint(100000, 999999)}"
     expires_at = datetime.utcnow() + timedelta(minutes=5)
     OTP_STORE[payload.email] = {
         "code": code,
         "expires_at": expires_at,
     }
-    send_otp_email(payload.email, code)
+    await send_otp_email(request, payload.email, code)
     return {"message": "Código OTP enviado al correo."}
 
 
