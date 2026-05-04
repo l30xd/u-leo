@@ -17,6 +17,11 @@ else:
     ENV_PATH = os.path.join(BASE_DIR, ".env")
 load_dotenv(dotenv_path=ENV_PATH)
 
+print(f"[INIT] Cargando .env desde: {ENV_PATH}")
+print(f"[INIT] EMAIL_USERNAME: {os.getenv('EMAIL_USERNAME')}")
+print(f"[INIT] EMAIL_PASSWORD: {'*' * len(os.getenv('EMAIL_PASSWORD') or '')}")
+print(f"[INIT] EMAIL_FROM: {os.getenv('EMAIL_FROM')}")
+
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
