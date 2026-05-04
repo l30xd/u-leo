@@ -3,6 +3,5 @@ uvicorn
 sqlalchemy
 pydantic
 python-dotenv
-fastapi-mail
 email-validator
 python-multipart

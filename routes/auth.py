@@ -7,7 +7,6 @@ from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Header, Depends, status, Request
 from pydantic import BaseModel, EmailStr
-from fastapi_mail import MessageSchema
 
 router = APIRouter(prefix="/auth")
 
@@ -46,31 +45,26 @@ def get_mail_configuration() -> dict:
 
 
 async def send_otp_email(request: Request, email: str, code: str) -> None:
-    fm = getattr(request.app.state, "fm", None)
-    if fm is None:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=(
-                "El servidor de correo no está inicializado. "
-                "Asegúrate de iniciar la aplicación con un servidor ASGI como uvicorn."
-            ),
-        )
-
-    message = MessageSchema(
-        subject="Código OTP para acceder al CRUD",
-        recipients=[email],
-        body=f"Tu código OTP es: {code}\n\nIntroduce este código en la aplicación para poder acceder al CRUD.",
-        subtype="plain"
-    )
-
+    username = os.getenv("EMAIL_USERNAME")
+    password = os.getenv("EMAIL_PASSWORD")
+    from_email = os.getenv("EMAIL_FROM")
+    
+    if not username or not password or not from_email:
+        raise HTTPException(status_code=500, detail="Falta configuración de correo")
+    
+    msg = EmailMessage()
+    msg["Subject"] = "Código OTP para acceder al CRUD"
+    msg["From"] = from_email
+    msg["To"] = email
+    msg.set_content(f"Tu código OTP es: {code}\n\nIntroduce este código en la aplicación.")
+    
     try:
-        await fm.send_message(message)
-    except Exception as exc:
-        print("[SMTP ERROR]", exc)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="No se pudo enviar el correo OTP. Verifica la configuración SMTP.",
-        ) from exc
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(username, password)
+            smtp.send_message(msg)
+    except Exception as e:
+        print("[SMTP ERROR]", e)
+        raise HTTPException(status_code=500, detail="No se pudo enviar el correo.")
 
 
 @router.post("/request-otp")
