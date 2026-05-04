@@ -9,7 +9,12 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ENV_PATH = "/etc/secrets/env" if os.path.exists("/etc/secrets/env") else os.path.join(BASE_DIR, ".env")
+if os.path.exists("/etc/secrets/env"):
+    ENV_PATH = "/etc/secrets/env"
+elif os.path.exists("/etc/secrets/.env"):
+    ENV_PATH = "/etc/secrets/.env"
+else:
+    ENV_PATH = os.path.join(BASE_DIR, ".env")
 load_dotenv(dotenv_path=ENV_PATH)
 
 Base.metadata.create_all(bind=engine)
