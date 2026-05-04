@@ -9,18 +9,15 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-if os.path.exists("/etc/secrets/env"):
+if os.path.exists("/etc/secrets/resend"):
+    ENV_PATH = "/etc/secrets/resend"
+elif os.path.exists("/etc/secrets/env"):
     ENV_PATH = "/etc/secrets/env"
 elif os.path.exists("/etc/secrets/.env"):
     ENV_PATH = "/etc/secrets/.env"
 else:
     ENV_PATH = os.path.join(BASE_DIR, ".env")
 load_dotenv(dotenv_path=ENV_PATH)
-
-print(f"[INIT] Cargando .env desde: {ENV_PATH}")
-print(f"[INIT] EMAIL_USERNAME: {os.getenv('EMAIL_USERNAME')}")
-print(f"[INIT] EMAIL_PASSWORD: {'*' * len(os.getenv('EMAIL_PASSWORD') or '')}")
-print(f"[INIT] EMAIL_FROM: {os.getenv('EMAIL_FROM')}")
 
 Base.metadata.create_all(bind=engine)
 
@@ -39,10 +36,10 @@ mail_conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("EMAIL_USERNAME"),
     MAIL_PASSWORD=os.getenv("EMAIL_PASSWORD"),
     MAIL_FROM=os.getenv("EMAIL_FROM"),
-    MAIL_PORT=465,
-    MAIL_SERVER="smtp.gmail.com",
-    MAIL_STARTTLS=False,
-    MAIL_SSL_TLS=True,
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.resend.com",
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
 )
 
 @app.on_event("startup")
