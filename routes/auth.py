@@ -23,29 +23,12 @@ class AuthToken(BaseModel):
     token: str
 
 
-def get_mail_configuration() -> dict:
-    username = os.getenv("EMAIL_USERNAME")
-    password = os.getenv("EMAIL_PASSWORD")
-    from_email = os.getenv("EMAIL_FROM")
-    if not username or not password or not from_email:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=(
-                "Falta configuración de correo. "
-                "Define EMAIL_USERNAME, EMAIL_PASSWORD y EMAIL_FROM en las variables de entorno."
-            ),
-        )
-
-    return {
-        "username": username,
-        "password": password,
-        "from_email": from_email,
-    }
-
-
 async def send_otp_email(request: Request, email: str, code: str) -> None:
     api_key = os.getenv("EMAIL_PASSWORD")
     from_email = os.getenv("EMAIL_FROM")
+    
+    print(f"[RESEND CONFIG] API Key: {'*' * 10}{api_key[-10:] if api_key else 'NOT SET'}")
+    print(f"[RESEND CONFIG] From Email: {from_email}")
     
     if not api_key or not from_email:
         raise HTTPException(status_code=500, detail="Falta configuración de correo (EMAIL_PASSWORD y EMAIL_FROM)")
@@ -63,11 +46,15 @@ async def send_otp_email(request: Request, email: str, code: str) -> None:
     }
     
     try:
+        print(f"[RESEND] Enviando email a {email}...")
         response = requests.post(url, json=data, headers=headers, timeout=10)
+        print(f"[RESEND] Status: {response.status_code}")
+        print(f"[RESEND] Response: {response.text}")
         response.raise_for_status()
+        print("[RESEND] Email enviado exitosamente")
     except requests.RequestException as e:
-        print("[RESEND API ERROR]", e)
-        raise HTTPException(status_code=500, detail="No se pudo enviar el correo.")
+        print("[RESEND API ERROR]", str(e))
+        raise HTTPException(status_code=500, detail=f"Error Resend: {str(e)}")
 
 
 @router.post("/request-otp")
