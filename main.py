@@ -8,7 +8,8 @@ from database import engine, Base
 import os
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="u-leo/.env")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,7 +39,7 @@ fm = FastMail(mail_conf)
 app.include_router(auth_router)
 app.include_router(students.router)
 
-app.mount("/", StaticFiles(directory="u-leo/frontend"), name="frontend")
+app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "frontend")), name="frontend")
 
 # Hacer que fm esté disponible en las rutas
 app.state.fm = fm
