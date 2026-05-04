@@ -66,6 +66,7 @@ async def send_otp_email(request: Request, email: str, code: str) -> None:
     try:
         await fm.send_message(message)
     except Exception as exc:
+        print("[SMTP ERROR]", exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="No se pudo enviar el correo OTP. Verifica la configuración SMTP.",
@@ -74,13 +75,16 @@ async def send_otp_email(request: Request, email: str, code: str) -> None:
 
 @router.post("/request-otp")
 async def request_otp(payload: OTPRequest, request: Request):
+    print(f"[REQUEST OTP] Email: {payload.email}")
     code = f"{random.randint(100000, 999999)}"
     expires_at = datetime.utcnow() + timedelta(minutes=5)
     OTP_STORE[payload.email] = {
         "code": code,
         "expires_at": expires_at,
     }
+    print(f"[REQUEST OTP] Code generated: {code}")
     await send_otp_email(request, payload.email, code)
+    print("[REQUEST OTP] Email sent successfully")
     return {"message": "Código OTP enviado al correo."}
 
 
