@@ -46,7 +46,16 @@ def get_mail_configuration() -> dict:
 
 
 async def send_otp_email(request: Request, email: str, code: str) -> None:
-    fm = request.app.state.fm
+    fm = getattr(request.app.state, "fm", None)
+    if fm is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=(
+                "El servidor de correo no está inicializado. "
+                "Asegúrate de iniciar la aplicación con un servidor ASGI como uvicorn."
+            ),
+        )
+
     message = MessageSchema(
         subject="Código OTP para acceder al CRUD",
         recipients=[email],
@@ -57,6 +66,7 @@ async def send_otp_email(request: Request, email: str, code: str) -> None:
     try:
         await fm.send_message(message)
     except Exception as exc:
+        print("[SMTP ERROR]", exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="No se pudo enviar el correo OTP. Verifica la configuración SMTP.",
