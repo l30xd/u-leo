@@ -75,12 +75,14 @@ async def send_otp_email(request: Request, email: str, code: str) -> None:
 
 @router.post("/request-otp")
 async def request_otp(payload: OTPRequest, request: Request):
+    print(f"[OTP REQUEST] Email: {payload.email}")
     code = f"{random.randint(100000, 999999)}"
     expires_at = datetime.utcnow() + timedelta(minutes=5)
     OTP_STORE[payload.email] = {
         "code": code,
         "expires_at": expires_at,
     }
+    print(f"[OTP REQUEST] Code generated: {code}")
     await send_otp_email(request, payload.email, code)
     return {"message": "Código OTP enviado al correo."}
 

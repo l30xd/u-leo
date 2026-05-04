@@ -39,10 +39,10 @@ mail_conf = ConnectionConfig(
     MAIL_USERNAME=os.getenv("EMAIL_USERNAME"),
     MAIL_PASSWORD=os.getenv("EMAIL_PASSWORD"),
     MAIL_FROM=os.getenv("EMAIL_FROM"),
-    MAIL_PORT=587,
+    MAIL_PORT=465,
     MAIL_SERVER="smtp.gmail.com",
-    MAIL_STARTTLS=True,
-    MAIL_SSL_TLS=False,
+    MAIL_STARTTLS=False,
+    MAIL_SSL_TLS=True,
 )
 
 @app.on_event("startup")
