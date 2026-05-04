@@ -35,12 +35,11 @@ mail_conf = ConnectionConfig(
     MAIL_SSL_TLS=False,
 )
 
-fm = FastMail(mail_conf)
+@app.on_event("startup")
+async def startup_event():
+    app.state.fm = FastMail(mail_conf)
 
 app.include_router(auth_router)
 app.include_router(students.router)
 
 app.mount("/", StaticFiles(directory=os.path.join(BASE_DIR, "frontend")), name="frontend")
-
-# Hacer que fm esté disponible en las rutas
-app.state.fm = fm
