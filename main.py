@@ -8,10 +8,10 @@ import os
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-if os.path.exists("/etc/secrets/env"):
-    ENV_PATH = "/etc/secrets/env"
-elif os.path.exists("/etc/secrets/resend"):
+if os.path.exists("/etc/secrets/resend"):
     ENV_PATH = "/etc/secrets/resend"
+elif os.path.exists("/etc/secrets/env"):
+    ENV_PATH = "/etc/secrets/env"
 elif os.path.exists("/etc/secrets/.env"):
     ENV_PATH = "/etc/secrets/.env"
 else:

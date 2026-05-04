@@ -1,9 +1,8 @@
 import os
 import random
-import smtplib
 from datetime import datetime, timedelta
-from email.message import EmailMessage
 from uuid import uuid4
+import requests
 
 from fastapi import APIRouter, HTTPException, Header, Depends, status, Request
 from pydantic import BaseModel, EmailStr
@@ -45,25 +44,29 @@ def get_mail_configuration() -> dict:
 
 
 async def send_otp_email(request: Request, email: str, code: str) -> None:
-    username = os.getenv("EMAIL_USERNAME")
-    password = os.getenv("EMAIL_PASSWORD")
+    api_key = os.getenv("EMAIL_PASSWORD")
     from_email = os.getenv("EMAIL_FROM")
     
-    if not username or not password or not from_email:
-        raise HTTPException(status_code=500, detail="Falta configuración de correo")
+    if not api_key or not from_email:
+        raise HTTPException(status_code=500, detail="Falta configuración de correo (EMAIL_PASSWORD y EMAIL_FROM)")
     
-    msg = EmailMessage()
-    msg["Subject"] = "Código OTP para acceder al CRUD"
-    msg["From"] = from_email
-    msg["To"] = email
-    msg.set_content(f"Tu código OTP es: {code}\n\nIntroduce este código en la aplicación.")
+    url = "https://api.resend.com/emails"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "from": from_email,
+        "to": [email],
+        "subject": "Código OTP para acceder al CRUD",
+        "text": f"Tu código OTP es: {code}\n\nIntroduce este código en la aplicación para acceder al CRUD."
+    }
     
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
-            smtp.login(username, password)
-            smtp.send_message(msg)
-    except Exception as e:
-        print("[SMTP ERROR]", e)
+        response = requests.post(url, json=data, headers=headers, timeout=10)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        print("[RESEND API ERROR]", e)
         raise HTTPException(status_code=500, detail="No se pudo enviar el correo.")
 
 
