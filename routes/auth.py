@@ -59,27 +59,29 @@ async def send_otp_email(request: Request, email: str, code: str) -> None:
 
 @router.post("/request-otp")
 async def request_otp(payload: OTPRequest, request: Request):
-    print(f"[REQUEST OTP] Email: {payload.email}")
+    email = payload.email.strip().lower()
+    print(f"[REQUEST OTP] Email: {email}")
     code = f"{random.randint(100000, 999999)}"
     expires_at = datetime.utcnow() + timedelta(minutes=5)
-    OTP_STORE[payload.email] = {
+    OTP_STORE[email] = {
         "code": code,
         "expires_at": expires_at,
     }
     print(f"[REQUEST OTP] Code generated: {code}")
-    await send_otp_email(request, payload.email, code)
+    await send_otp_email(request, email, code)
     print("[REQUEST OTP] Email sent successfully")
     return {"message": "Código OTP enviado al correo."}
 
 
 @router.post("/verify-otp", response_model=AuthToken)
 def verify_otp(payload: OTPVerify):
-    otp_data = OTP_STORE.get(payload.email)
+    email = payload.email.strip().lower()
+    otp_data = OTP_STORE.get(email)
     if not otp_data:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="OTP no solicitado o expirado.")
 
     if datetime.utcnow() > otp_data["expires_at"]:
-        OTP_STORE.pop(payload.email, None)
+        OTP_STORE.pop(email, None)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El código OTP expiró.")
 
     if otp_data["code"] != payload.code.strip():
@@ -87,10 +89,10 @@ def verify_otp(payload: OTPVerify):
 
     token = str(uuid4())
     TOKEN_STORE[token] = {
-        "email": payload.email,
-        "expires_at": datetime.utcnow() + timedelta(hours=1),
+        "email": email,
+        "expires_at": datetime.utcnow() + timedelta(hours=24),  # Increased to 24 hours
     }
-    OTP_STORE.pop(payload.email, None)
+    OTP_STORE.pop(email, None)
     return {"token": token}
 
 
